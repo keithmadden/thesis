@@ -12,17 +12,19 @@ class Population {
   Rocket[] population;         // Array to hold the current population
   ArrayList<Rocket> matingPool;    // ArrayList which we will use for our "mating pool"
   int generations;             // Number of generations
+  int[][] distance;
 
    // Initialize the population
-   Population(float m, int num, int[][] g) {
+   Population(float m, int num, int[][] g, int[][] d) {
     mutationRate = m;
     population = new Rocket[num];
     matingPool = new ArrayList<Rocket>();
+    distance = d;
     generations = 0;
     //make a new set of creatures
     for (int i = 0; i < population.length; i++) {
       PVector position = new PVector(width/2,height+20);
-      population[i] = new Rocket(position, new DNA(),population.length, g);
+      population[i] = new Rocket(position, new DNA(),population.length, g, d);
     }
   }
 
@@ -46,10 +48,10 @@ class Population {
   // Calculate fitness for each creature
   void fitness() {
     for (int i = 0; i < population.length; i++) {
-      population[i].fitness();
+      population[i].fitness(); //<>//
     }
   }
-
+  
   // Generate a mating pool
   void selection() {
     // Clear the ArrayList
@@ -90,7 +92,7 @@ class Population {
       child.mutate(mutationRate);
       // Fill the new population with the new child
       PVector position = new PVector(width/2,height+20);
-      population[i] = new Rocket(position, child,population.length, grid);
+      population[i] = new Rocket(position, child,population.length, grid, distance);
     }
     generations++;
   }

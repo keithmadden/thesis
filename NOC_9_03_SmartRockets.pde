@@ -1,4 +1,4 @@
-int lifetime;  // How long should each generation live //<>// //<>//
+int lifetime;  // How long should each generation live //<>// //<>// //<>//
 
 Population population;  // Population
 
@@ -6,6 +6,7 @@ int lifecycle;          // Timer for cycle of generation
 int recordtime;         // Fastest time to target
 
 Obstacle target;        // Target position
+Rocket rocket;
 
 ArrayList<Obstacle> obstacles;  //an array list to keep track of all the obstacles!
 
@@ -14,10 +15,19 @@ float d = 25;
 int[][] grid;
 Cell[][] graph;
 
+  int w;   
+  int h;
+  int[][] distance;
+  int maxDist = -1;
+
+  int startr;
+  int startc;
+
 
 
 //boolean[][] walls = new boolean[h][w];
 
+ //<>// //<>//
 
 void setup() {
   size(600, 400);
@@ -38,6 +48,7 @@ void setup() {
   obstacles.add(new Obstacle(width -500, height/5, 10, 500));
 
   grid = new int[40][60];
+  distance = new int[40][60];
   for (int r = 0; r != 40; r++) {
     for (int c = 0; c != 60; c++) {
       grid[r][c] = isObstacle(c, r);
@@ -49,9 +60,23 @@ void setup() {
     }
     println();
   }
+  
+  w = width / 10;
+  h = height / 10;
+  bfs();
+  
+  
+  for (int r = 0; r != 40; r++) {
+    for (int c = 0; c != 60; c++) {
+      String s = String.format("%03d", distance[r][c]);
+      print(" " + s);
+    }
+    println();
+  }
+
   // Create a population with a mutation rate, and population max
-  float mutationRate = 0.1;
-  population = new Population(mutationRate, 50, grid);
+  float mutationRate = 0.5;
+  population = new Population(mutationRate, 50, grid, distance);
 
   //graph = new Cell[40][60];
   //for (int i = 0; i != 40; i++) {
@@ -98,8 +123,55 @@ void setup() {
   //  }
   //}
   println("done");
-  //bfs();
 }
+
+  void bfs() {
+    for (int j = 0; j < h; j++) for (int i = 0; i < w; i++) distance[j][i] = -1;
+    boolean[][] visited = new boolean[h][w];
+    ArrayList<Integer> xq = new ArrayList<Integer>();
+    ArrayList<Integer> yq = new ArrayList<Integer>();
+     
+    //int rposX = round(position.x);
+    //int rposY = round(position.y);
+    
+    startr = (int)target.position.y / 10;
+    startc = (int)target.position.x / 10;
+    
+    xq.add(0,startc);
+    yq.add(0,startr);
+    distance[startr][startc] = 0;
+    maxDist = 0;
+    while (xq.size() > 0 ) {
+      int x = xq.remove(xq.size()-1);  //taken one block
+      int y = yq.remove(yq.size()-1);
+      visited[y][x] = true;
+      int[] dx = {
+        0, 0, -1, 1
+      }
+      , dy = {
+        1, -1, 0, 0
+      };
+      for (int dir = 0; dir < 4; dir++) {
+        int nextx = x + dx[dir], nexty = y + dy[dir];
+        if (nextx >= 0 && nexty >= 0 && nextx < w && nexty < h && !visited[nexty][nextx] && grid[nexty][nextx] == 0) {
+          xq.add(0,nextx);
+          yq.add(0,nexty);
+          //THIS IS IMPORTANT:
+          distance[nexty][nextx] = distance[y][x] + 1;
+          visited[nexty][nextx] = true;
+          if (distance[nexty][nextx] > maxDist) {
+            maxDist = distance[nexty][nextx];
+          }
+        }
+      }
+    }
+  }
+  
+  float getMaxDist() {
+    return maxDist;
+  }
+  
+
 
 int isObstacle(int c, int r) {
   int x = c * 10 + 5;

@@ -32,15 +32,15 @@ class Rocket {
   int cols = 600;
   int rows = 400;
   
-  int w;
-  int h;
+  //int w;   //int h;
   int[][] distance;
-  int maxDist = -1;
-  int startr;
-  int startc;
+  //int maxDist = -1;
+
+  //int startr;
+  //int startc;
 
   //constructor
-  Rocket(PVector l, DNA dna_, int totalRockets, int[][] g) {
+  Rocket(PVector l, DNA dna_, int totalRockets, int[][] g, int[][] d) {
     acceleration = new PVector();
     velocity = new PVector();
     position = l.get();
@@ -51,9 +51,9 @@ class Rocket {
     maxspeed = 2.5;
     maxforce = 0.15;
     
-    w = width/10;
-    h = height/10;
-    distance = new int[h][w];
+    //w = width/10;
+    //h = height/10;
+    distance = d;
     grid = g;
   }
 
@@ -73,8 +73,8 @@ class Rocket {
 
     if (hitObstacle) fitness *= 0.1; // lose 90% of fitness hitting an obstacle
     if (hitTarget) fitness *= 2; // twice the fitness for finishing!
-    
-    bfs();
+    //bfs();
+    //println("current fitness level " + getMaxDist());
   }
   
   
@@ -160,7 +160,14 @@ class Rocket {
 
   // Did I make it to the target?
   void checkTarget() {
-    float d = dist(position.x, position.y, target.position.x, target.position.y);
+    //float d = dist(position.x, position.y, target.position.x, target.position.y);
+    int r = ((int)position.y)/10;
+    int c = ((int)position.x)/10;
+    if (r > 39) r = 39;
+    if (c > 59) c = 59;
+    float d = distance[r][c];
+    d = d * 10;
+    println(d);
     if (d < recordDist) recordDist = d;
 
     if (target.contains(position) && !hitTarget) {
@@ -229,41 +236,6 @@ class Rocket {
 
   boolean stopped() {
     return hitObstacle;
-  }
-  
-  void bfs() {
-    for (int j = 0; j < h; j++) for (int i = 0; i < w; i++) distance[j][i] = -1;
-    boolean[][] visited = new boolean[h][w];
-    ArrayList<Integer> xq = new ArrayList<Integer>();
-    ArrayList<Integer> yq = new ArrayList<Integer>();
-    xq.add(0,startc);
-    yq.add(0,startr);
-    distance[startr][startc] = 0;
-    maxDist = 0;
-    while ( xq.size () > 0 ) {
-      int x = xq.remove(xq.size()-1);  //taken one block
-      int y = yq.remove(yq.size()-1);
-      visited[y][x] = true;
-      int[] dx = {
-        0, 0, -1, 1
-      }
-      , dy = {
-        1, -1, 0, 0
-      };
-      for (int dir = 0; dir < 4; dir++) {
-        int nextx = x + dx[dir], nexty = y + dy[dir];
-        if (nextx >= 0 && nexty >= 0 && nextx < w && nexty < h && !visited[nexty][nextx] && grid[nexty][nextx] == 0) {
-          xq.add(0,nextx);
-          yq.add(0,nexty);
-          //THIS IS IMPORTANT:
-          distance[nexty][nextx] = distance[y][x] + 1;
-          visited[nexty][nextx] = true;
-          if (distance[nexty][nextx] > maxDist) {
-            maxDist = distance[nexty][nextx];
-          }
-        }
-      }
-    }
   }
   
   //void grid() {
